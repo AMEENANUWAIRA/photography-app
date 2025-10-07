@@ -124,11 +124,57 @@ const couponCodes = {
   'FESTIVE25': 25,
   'EARLYBIRD': 12
 };
+
+interface PackageAPIResponse {
+  id: number;
+  name: string;
+  description: string;
+  budget_range: string;
+  base_price: string;
+  album_price: string;
+  photographer_price: string;
+  cinematographer_price: string;
+  extra_hour_price: string;
+}
 // ======================================================
 
 export function PackageRecommendationStep({ bookingData, updateBookingData }: PackageRecommendationStepProps) {
+  const [availablePackages, setAvailablePackages] = useState<Package[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [couponInput, setCouponInput] = useState(bookingData.couponCode || '');
   const [couponError, setCouponError] = useState('');
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const res = await axios.get<PackageAPIResponse[]>("http://127.0.0.1:8000/api/packages/");
+        const transformed = res.data.map((pkg) => ({
+          id: pkg.id.toString(),
+          name: pkg.name,
+          description: pkg.description,
+          budgetRange: [pkg.budget_range],
+          basePrice: parseFloat(pkg.base_price),
+          albumPrice: parseFloat(pkg.album_price),
+          photographerPrice: parseFloat(pkg.photographer_price),
+          cinematographerPrice: parseFloat(pkg.cinematographer_price),
+          highlightVideoPrice: 0,
+          fullVideoPrice: 0,
+          reelPrice: 0,
+          extraHourlyRate: parseFloat(pkg.extra_hour_price),
+        }));
+        setAvailablePackages(transformed);
+      } catch (err) {
+        console.error("Error fetching packages:", err);
+        setError("Failed to load packages.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
 
   // Auto-recommend package based on budget and booking type
   const recommendedPackageId = useMemo((): string => {
