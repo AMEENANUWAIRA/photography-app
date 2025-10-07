@@ -111,15 +111,15 @@ export default function App() {
         phone: bookingData.phone,
         location: bookingData.currentLocation,
       });
-
+  
       // Assuming backend returns both id (numeric) and client_id (string)
       const client = response.data as { id: number; client_id: string };
-
-      updateBookingData({
-        clientId: client.id, // numeric PK for Booking
-        clientCode: client.client_id, // display string
+  
+      updateBookingData({ 
+        clientId: client.id,      // numeric PK for Booking
+        clientCode: client.client_id // display string
       });
-
+  
       alert("Client saved successfully!");
     } catch (error) {
       console.error(error);
@@ -129,6 +129,7 @@ export default function App() {
       setLoading(false);
     }
   };
+  
 
   const saveBooking = async () => {
     try {
@@ -136,11 +137,11 @@ export default function App() {
         alert("Client must be saved first!");
         return;
       }
-
+  
       setLoading(true);
-
+  
       const bookingPayload = {
-        client: bookingData.clientId, // numeric PK of client
+        client: bookingData.clientId,   // numeric PK of client
         event_date: bookingData.eventDate,
         event_location: bookingData.eventLocation,
         guest_range: bookingData.guestRange,
@@ -159,14 +160,15 @@ export default function App() {
         advance: bookingData.advance,
         balance_date: bookingData.balanceDate,
       };
-
+      
+  
       console.log("Booking payload:", bookingPayload);
-
+  
       const response = await axios.post(
         "http://localhost:8000/api/bookings/",
         bookingPayload
       );
-
+  
       alert("Booking saved successfully!");
       console.log("Booking saved:", response.data);
     } catch (error: any) {
@@ -177,6 +179,7 @@ export default function App() {
       setLoading(false);
     }
   };
+  
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
@@ -250,63 +253,93 @@ export default function App() {
         </Card>
 
         {/* Navigation */}
-        <div className="flex justify-between items-center">
-          <Button
-            variant="outline"
-            onClick={prevStep}
-            disabled={currentStep === 0}
-            className="flex items-center gap-2 h-12 px-6 border-2 border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ArrowLeft className="w-4 h-4" /> Previous
-          </Button>
+<div className="flex justify-between items-center">
+  <Button
+    variant="outline"
+    onClick={prevStep}
+    disabled={currentStep === 0}
+    className="flex items-center gap-2 h-12 px-6 border-2 border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <ArrowLeft className="w-4 h-4" /> Previous
+  </Button>
 
-          <div className="flex gap-2">
-            {steps.map((_, index) => (
-              <div
-                key={index}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index <= currentStep
-                    ? "bg-gradient-to-r from-black to-gray-800 shadow-sm"
-                    : "bg-gray-300 hover:bg-gray-400"
-                }`}
-              />
-            ))}
-          </div>
+  <div className="flex gap-2">
+    {steps.map((_, index) => (
+      <div
+        key={index}
+        className={`w-3 h-3 rounded-full transition-all duration-300 ${
+          index <= currentStep
+            ? "bg-gradient-to-r from-black to-gray-800 shadow-sm"
+            : "bg-gray-300 hover:bg-gray-400"
+        }`}
+      />
+    ))}
+  </div>
 
-          <Button
-            onClick={async () => {
-              try {
-                if (currentStep === 0) {
-                  // Step 1 → Save client first
-                  await saveClient();
-                  nextStep();
-                } else if (currentStep === steps.length - 1) {
-                  // ✅ Final step → Save booking
-                  if (!bookingData.clientId) {
-                    await saveClient(); // ensure client is saved if skipped somehow
-                  }
+  <Button
+    onClick={async () => {
+      try {
+        if (currentStep === 0) {
+          // Save client in Step 1
+          await saveClient();
+          nextStep();
+        } else if (currentStep === steps.length - 1) {
+          // Final step → save booking
+          await saveBooking();
 
-                  await saveBooking(); // save the booking to backend
+          alert("✅ Booking completed successfully!");
 
-                  alert("🎉 Booking completed successfully!");
-                  // Optional: reset form or redirect
-                  // window.location.reload();
-                } else {
-                  // Just move to the next step
-                  nextStep();
-                }
-              } catch (error) {
-                console.error("Save failed:", error);
-                alert("Failed to save. Please check the form or try again.");
-              }
-            }}
-            disabled={loading}
-            className="flex text-white items-center gap-2 h-12 px-6 bg-gradient-to-r from-black to-gray-800 hover:from-gray-700 hover:to-black hover:shadow-2xl transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {currentStep === steps.length - 1 ? "Complete" : "Next"}
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </div>
+          // Reset the form and go back to step 0
+          setBookingData({
+            clientName: "",
+            phone: "",
+            whatsapp: "",
+            email: "",
+            homeAddress: "",
+            currentLocation: "",
+            bookingType: "bride",
+            eventLocation: "",
+            eventDate: "",
+            guestRange: "300–500",
+            budgetRange: "Up to ₹50k",
+            mainFunctions: [],
+            additionalFunctions: [],
+            photographers: 1,
+            cinematographers: 1,
+            albumPages: 60,
+            albumType: "one",
+            complimentarySelection: "",
+            complimentaryFunctions: [],
+            complimentaryCinematographer: false,
+            addOns: {
+              highlightShortMovie: false,
+              fullDocumentaryFilm: false,
+              reel: false,
+            },
+            selectedPackage: "",
+            totalPrice: 0,
+            couponCode: "",
+            couponDiscount: 0,
+            advance: 0,
+            balanceDate: "",
+          });
+          setCurrentStep(0);
+        } else {
+          nextStep();
+        }
+      } catch (error) {
+        console.error("Save failed:", error);
+        alert("Failed to save. Please check the form or try again.");
+      }
+    }}
+    disabled={loading}
+    className="flex text-white items-center gap-2 h-12 px-6 bg-gradient-to-r from-black to-gray-800 hover:from-gray-700 hover:to-black hover:shadow-2xl transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    {currentStep === steps.length - 1 ? "Complete" : "Next"}
+    <ArrowRight className="w-4 h-4" />
+  </Button>
+</div>
+
       </div>
     </div>
   );
