@@ -111,15 +111,15 @@ export default function App() {
         phone: bookingData.phone,
         location: bookingData.currentLocation,
       });
-  
+
       // Assuming backend returns both id (numeric) and client_id (string)
       const client = response.data as { id: number; client_id: string };
-  
-      updateBookingData({ 
-        clientId: client.id,      // numeric PK for Booking
-        clientCode: client.client_id // display string
+
+      updateBookingData({
+        clientId: client.id, // numeric PK for Booking
+        clientCode: client.client_id, // display string
       });
-  
+
       alert("Client saved successfully!");
     } catch (error) {
       console.error(error);
@@ -129,7 +129,6 @@ export default function App() {
       setLoading(false);
     }
   };
-  
 
   const saveBooking = async () => {
     try {
@@ -137,11 +136,11 @@ export default function App() {
         alert("Client must be saved first!");
         return;
       }
-  
+
       setLoading(true);
-  
+
       const bookingPayload = {
-        client: bookingData.clientId,   // numeric PK of client
+        client: bookingData.clientId, // numeric PK of client
         event_date: bookingData.eventDate,
         event_location: bookingData.eventLocation,
         guest_range: bookingData.guestRange,
@@ -160,15 +159,14 @@ export default function App() {
         advance: bookingData.advance,
         balance_date: bookingData.balanceDate,
       };
-      
-  
+
       console.log("Booking payload:", bookingPayload);
-  
+
       const response = await axios.post(
         "http://localhost:8000/api/bookings/",
         bookingPayload
       );
-  
+
       alert("Booking saved successfully!");
       console.log("Booking saved:", response.data);
     } catch (error: any) {
@@ -179,7 +177,6 @@ export default function App() {
       setLoading(false);
     }
   };
-  
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
@@ -280,20 +277,30 @@ export default function App() {
             onClick={async () => {
               try {
                 if (currentStep === 0) {
-                  // Save client on Step 1
+                  // Step 1 → Save client first
                   await saveClient();
-                  nextStep(); // move next only if saveClient succeeds
+                  nextStep();
+                } else if (currentStep === steps.length - 1) {
+                  // ✅ Final step → Save booking
+                  if (!bookingData.clientId) {
+                    await saveClient(); // ensure client is saved if skipped somehow
+                  }
+
+                  await saveBooking(); // save the booking to backend
+
+                  alert("🎉 Booking completed successfully!");
+                  // Optional: reset form or redirect
+                  // window.location.reload();
                 } else {
-                  // For steps 3, 4, etc., just move next
+                  // Just move to the next step
                   nextStep();
                 }
               } catch (error) {
                 console.error("Save failed:", error);
                 alert("Failed to save. Please check the form or try again.");
-                // nextStep is NOT called if an error occurs
               }
             }}
-            disabled={currentStep === steps.length - 1 || loading}
+            disabled={loading}
             className="flex text-white items-center gap-2 h-12 px-6 bg-gradient-to-r from-black to-gray-800 hover:from-gray-700 hover:to-black hover:shadow-2xl transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {currentStep === steps.length - 1 ? "Complete" : "Next"}
