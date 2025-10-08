@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { BookingsManagement } from './admin/BookingsManagement';
 import { ClientManagement } from './admin/ClientManagement';
-import { PackageManagement } from './admin/PackageManagement';
+import  {PackageManagement}  from './admin/PackageManagement';
 import { CouponManagement } from './admin/CouponManagement';
 import { CalendarView } from './admin/CalendarView';
 import { ReportsAnalytics } from './admin/ReportsAnalytics';
