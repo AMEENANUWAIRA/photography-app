@@ -50,7 +50,7 @@ interface ClientType {
   email: string;
   phone: string;
   whatsapp?: string;
-  location: string; 
+  location: string;
   status: string;
   homeAddress?: string;
   notes?: string;
@@ -82,7 +82,7 @@ export function ClientManagement() {
     location: "",
     status: "Active",
     notes: "",
-  });  
+  });
 
   // Fetch clients
   useEffect(() => {
@@ -144,7 +144,6 @@ export function ClientManagement() {
     });
     setIsEditDialogOpen(true);
   };
-  
 
   const handleUpdateClient = async () => {
     if (!selectedClient) return;
@@ -158,7 +157,7 @@ export function ClientManagement() {
       status: formData.status,
       homeAddress: formData.homeAddress,
       notes: formData.notes,
-    };    
+    };
 
     try {
       await axios.put(`/api/clients/${selectedClient.id}/`, payload);
@@ -246,6 +245,86 @@ export function ClientManagement() {
         >
           <Plus className="w-4 h-4 mr-2" /> Add Client
         </Button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-blue-600 font-medium">
+                  Total Clients
+                </p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {clients.length}
+                </p>
+              </div>
+              <Users className="w-8 h-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-green-600 font-medium">
+                  Active Clients
+                </p>
+                <p className="text-2xl font-bold text-green-900">
+                  {
+                    clients.filter(
+                      (c) => c.status === "Active" || c.status === "VIP"
+                    ).length
+                  }
+                </p>
+              </div>
+              <User className="w-8 h-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-purple-600 font-medium">
+                  VIP Clients
+                </p>
+                <p className="text-2xl font-bold text-purple-900">
+                  {clients.filter((c) => c.status === "VIP").length}
+                </p>
+              </div>
+              <Star className="w-8 h-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-orange-600 font-medium">
+                  Avg. Spent
+                </p>
+                <p className="text-2xl font-bold text-orange-900">
+                  ₹
+                  {Math.round(
+                    clients.reduce(
+                      (sum, c) => sum + Number(c.totalSpent ?? 0),
+                      0
+                    ) /
+                      (clients.length || 1) /
+                      1000
+                  )}
+                  K
+                </p>
+              </div>
+              <IndianRupee className="w-8 h-8 text-orange-600" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
