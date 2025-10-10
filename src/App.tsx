@@ -41,6 +41,7 @@ export interface BookingData {
     reel: boolean;
   };
   selectedPackage: string;
+  selectedPackageName: string;
   totalPrice: number;
   couponCode: string;
   couponDiscount: number;
@@ -66,6 +67,7 @@ export default function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [bookingData, setBookingData] = useState<BookingData>({
     clientName: "",
+    selectedPackageName: "",
     phone: "",
     whatsapp: "",
     email: "",
@@ -317,6 +319,7 @@ export default function App() {
               reel: false,
             },
             selectedPackage: "",
+            selectedPackageName: "",
             totalPrice: 0,
             couponCode: "",
             couponDiscount: 0,
