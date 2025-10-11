@@ -172,7 +172,7 @@ export function BookingsManagement() {
           <h2 className="text-black">Bookings Management</h2>
           <p className="text-gray-600">Manage all event bookings and their status</p>
         </div>
-        <Button className="bg-gradient-to-r from-black to-gray-800 hover:from-gray-700 hover:to-black">
+        <Button className="bg-gradient-to-r from-black to-gray-800 hover:from-gray-700 hover:to-black text-white">
           <Plus className="w-4 h-4 mr-2" />
           New Booking
         </Button>
