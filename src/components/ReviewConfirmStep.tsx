@@ -82,7 +82,7 @@ export function ReviewConfirmStep({ bookingData, updateBookingData }: ReviewConf
                     <span>₹{balance.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-muted-foreground">
-                    <span>Balance Due:</span>
+                    <span>Balance Due Date:</span>
                     <span>7 days before event</span>
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export function ReviewConfirmStep({ bookingData, updateBookingData }: ReviewConf
         <CardContent>
           <div className="space-y-3">
             <div>
-              <p className="font-medium text-lg">{bookingData.selectedPackage ? bookingData.selectedPackage.charAt(0).toUpperCase() + bookingData.selectedPackage.slice(1) + ' Package' : 'No Package Selected'}</p>
+              <p className="font-medium text-lg">{bookingData.selectedPackageName || "No Package Selected"} Package</p>
               <p className="text-2xl font-medium text-black-elegant">₹{bookingData.totalPrice.toLocaleString()}</p>
             </div>
             

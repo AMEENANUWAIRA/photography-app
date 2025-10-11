@@ -1,50 +1,71 @@
-import React from 'react';
-import { Button } from './ui/button';
-import { Download, FileText } from 'lucide-react';
-import { BookingData } from '../App';
+import React, { useState, useEffect } from "react";
+import { Button } from "./ui/button";
+import { Download, FileText } from "lucide-react";
+import { BookingData } from "../App";
+
+import axios from "axios";
 
 interface PDFGeneratorProps {
   bookingData: BookingData;
 }
 
 export function PDFGenerator({ bookingData }: PDFGeneratorProps) {
+  const [packages, setPackages] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await axios.get<any>(
+          "http://localhost:8000/api/packages/"
+        );
+        setPackages(response.data);
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+      }
+    };
+
+    fetchPackages();
+  }, []);
+
   const generatePDF = () => {
     // Create a new window for printing
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
     const formatDate = (dateString: string) => {
-      if (!dateString) return 'Not specified';
-      return new Date(dateString).toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+      if (!dateString) return "Not specified";
+      return new Date(dateString).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
     };
 
     const formatTime = (timeString: string) => {
-      if (!timeString) return 'Not specified';
-      return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-IN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
+      if (!timeString) return "Not specified";
+      return new Date(`2000-01-01T${timeString}`).toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
       });
     };
 
     const getSelectedPackageInfo = () => {
-      const packages = [
-        { id: 'neon', name: 'Neon', description: 'Essential coverage for intimate events' },
-        { id: 'basic', name: 'Basic Elegance', description: 'Perfect starter package for small celebrations' },
-        { id: 'classic', name: 'Classic Memories', description: 'Comprehensive coverage with professional quality' },
-        { id: 'signature', name: 'Signature Luxury', description: 'Premium experience with enhanced deliverables' },
-        { id: 'gold', name: 'Gold Moments', description: 'Luxury package for grand celebrations' },
-        { id: 'premium', name: 'Premium Royal', description: 'Ultimate luxury with fixed premium crew' }
-      ];
-      return packages.find(p => p.id === bookingData.selectedPackage) || packages[0];
+      return (
+        packages.find(
+          (p) =>
+            p.id === bookingData.selectedPackage ||
+            p.name?.toLowerCase() ===
+              bookingData.selectedPackageName?.toLowerCase()
+        ) || {
+          name: bookingData.selectedPackageName || "Not specified",
+          description: "",
+        }
+      );
     };
 
     const packageInfo = getSelectedPackageInfo();
-    
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -209,12 +230,12 @@ export function PDFGenerator({ bookingData }: PDFGeneratorProps) {
         <div class="header">
           <h1>Professional Event Booking Summary</h1>
           <p>Photography & Videography Services</p>
-          <p>Generated on: ${new Date().toLocaleDateString('en-IN', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+          <p>Generated on: ${new Date().toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
           })}</p>
         </div>
         
@@ -223,29 +244,29 @@ export function PDFGenerator({ bookingData }: PDFGeneratorProps) {
           <div class="grid">
             <div class="field">
               <label>Client Name</label>
-              <span>${bookingData.clientName || 'Not provided'}</span>
+              <span>${bookingData.clientName || "Not provided"}</span>
             </div>
             <div class="field">
               <label>Phone Number</label>
-              <span>${bookingData.phone || 'Not provided'}</span>
+              <span>${bookingData.phone || "Not provided"}</span>
             </div>
             <div class="field">
               <label>WhatsApp</label>
-              <span>${bookingData.whatsapp || 'Same as phone'}</span>
+              <span>${bookingData.whatsapp || "Same as phone"}</span>
             </div>
             <div class="field">
               <label>Email Address</label>
-              <span>${bookingData.email || 'Not provided'}</span>
+              <span>${bookingData.email || "Not provided"}</span>
             </div>
           </div>
           <div class="grid">
             <div class="field">
               <label>Home Address</label>
-              <span>${bookingData.homeAddress || 'Not provided'}</span>
+              <span>${bookingData.homeAddress || "Not provided"}</span>
             </div>
             <div class="field">
               <label>Current Location</label>
-              <span>${bookingData.currentLocation || 'Not provided'}</span>
+              <span>${bookingData.currentLocation || "Not provided"}</span>
             </div>
           </div>
         </div>
@@ -255,11 +276,14 @@ export function PDFGenerator({ bookingData }: PDFGeneratorProps) {
           <div class="grid">
             <div class="field">
               <label>Booking Type</label>
-              <span>${bookingData.bookingType.charAt(0).toUpperCase() + bookingData.bookingType.slice(1)}</span>
+              <span>${
+                bookingData.bookingType.charAt(0).toUpperCase() +
+                bookingData.bookingType.slice(1)
+              }</span>
             </div>
             <div class="field">
               <label>Event Location</label>
-              <span>${bookingData.eventLocation || 'Not specified'}</span>
+              <span>${bookingData.eventLocation || "Not specified"}</span>
             </div>
             <div class="field">
               <label>Event Date</label>
@@ -276,12 +300,19 @@ export function PDFGenerator({ bookingData }: PDFGeneratorProps) {
           </div>
         </div>
         
-        ${bookingData.mainFunctions.length > 0 ? `
+        ${
+          bookingData.mainFunctions.length > 0
+            ? `
         <div class="section">
           <h2>Main Functions</h2>
-          ${bookingData.mainFunctions.map(func => `
+          ${bookingData.mainFunctions
+            .map(
+              (func) => `
             <div class="function-item">
-              <div class="function-title">${func.type.charAt(0).toUpperCase() + func.type.slice(1).replace(/([A-Z])/g, ' $1')}</div>
+              <div class="function-title">${
+                func.type.charAt(0).toUpperCase() +
+                func.type.slice(1).replace(/([A-Z])/g, " $1")
+              }</div>
               <div class="grid grid-3">
                 <div class="field">
                   <label>Date</label>
@@ -307,16 +338,27 @@ export function PDFGenerator({ bookingData }: PDFGeneratorProps) {
                 </div>
               </div>
             </div>
-          `).join('')}
+          `
+            )
+            .join("")}
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
-        ${bookingData.additionalFunctions.length > 0 ? `
+        ${
+          bookingData.additionalFunctions.length > 0
+            ? `
         <div class="section">
           <h2>Additional Functions</h2>
-          ${bookingData.additionalFunctions.map(func => `
+          ${bookingData.additionalFunctions
+            .map(
+              (func) => `
             <div class="function-item">
-              <div class="function-title">${func.type.charAt(0).toUpperCase() + func.type.slice(1).replace(/([A-Z])/g, ' $1')}</div>
+              <div class="function-title">${
+                func.type.charAt(0).toUpperCase() +
+                func.type.slice(1).replace(/([A-Z])/g, " $1")
+              }</div>
               <div class="grid grid-3">
                 <div class="field">
                   <label>Date</label>
@@ -346,9 +388,13 @@ export function PDFGenerator({ bookingData }: PDFGeneratorProps) {
                 </div>
               </div>
             </div>
-          `).join('')}
+          `
+            )
+            .join("")}
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <div class="section">
           <h2>Albums & Services</h2>
@@ -359,50 +405,107 @@ export function PDFGenerator({ bookingData }: PDFGeneratorProps) {
             </div>
             <div class="field">
               <label>Album Type</label>
-              <span>${bookingData.albumType === 'one' ? 'Single Photo-Book' : 'Two Individual Photo-Books'}</span>
+              <span>${
+                bookingData.albumType === "one"
+                  ? "Single Photo-Book"
+                  : "Two Individual Photo-Books"
+              }</span>
             </div>
             <div class="field">
               <label>Crew Size</label>
-              <span>${bookingData.photographers} Photographer(s) + ${bookingData.cinematographers} Cinematographer(s)</span>
+              <span>${bookingData.photographers} Photographer(s) + ${
+      bookingData.cinematographers
+    } Cinematographer(s)</span>
             </div>
           </div>
           
-          ${bookingData.complimentarySelection || (bookingData.complimentaryFunctions && bookingData.complimentaryFunctions.length > 0) || bookingData.complimentaryCinematographer ? `
+          ${
+            bookingData.complimentarySelection ||
+            (bookingData.complimentaryFunctions &&
+              bookingData.complimentaryFunctions.length > 0) ||
+            bookingData.complimentaryCinematographer
+              ? `
           <div style="margin-top: 15px;">
             <label style="font-weight: bold; display: block; margin-bottom: 8px;">Complimentary Items</label>
             <div class="addons-list">
-              ${bookingData.complimentarySelection === 'miniPhotobook' ? '<span class="addon-badge">Mini Photo Book</span>' : ''}
-              ${bookingData.complimentarySelection === 'calendarCombo' ? '<span class="addon-badge">Table Top Calendar</span>' : ''}
-              ${bookingData.complimentarySelection === 'photoFrames' ? '<span class="addon-badge">Photo Frames</span>' : ''}
-              ${bookingData.complimentaryFunctions ? bookingData.complimentaryFunctions.map((func, index) => {
-                const funcStr = func as string;
+              ${
+                bookingData.complimentarySelection === "miniPhotobook"
+                  ? '<span class="addon-badge">Mini Photo Book</span>'
+                  : ""
+              }
+              ${
+                bookingData.complimentarySelection === "calendarCombo"
+                  ? '<span class="addon-badge">Table Top Calendar</span>'
+                  : ""
+              }
+              ${
+                bookingData.complimentarySelection === "photoFrames"
+                  ? '<span class="addon-badge">Photo Frames</span>'
+                  : ""
+              }
+              ${
+                bookingData.complimentaryFunctions
+                  ? bookingData.complimentaryFunctions
+                      .map((func, index) => {
+                        const funcStr = func as string;
 
-const funcName =
-  funcStr === 'saveTheDate' ? 'Save the Date' :
-  funcStr === 'temple' ? 'Temple' :
-  funcStr === 'preWedding' ? 'Pre Wedding' :
-  funcStr === 'postWedding' ? 'Post Wedding' :
-  funcStr === 'madhuramVeppu' ? 'Madhuram Veppu' :
-  'Bridal Shower';
+                        const funcName =
+                          funcStr === "saveTheDate"
+                            ? "Save the Date"
+                            : funcStr === "temple"
+                            ? "Temple"
+                            : funcStr === "preWedding"
+                            ? "Pre Wedding"
+                            : funcStr === "postWedding"
+                            ? "Post Wedding"
+                            : funcStr === "madhuramVeppu"
+                            ? "Madhuram Veppu"
+                            : "Bridal Shower";
 
-
-                return `<span class="addon-badge">${funcName} ${index === 0 ? '(Complimentary)' : '(₹1,800/hour)'}</span>`;
-              }).join('') : ''}
-              ${bookingData.complimentaryCinematographer ? '<span class="addon-badge">Extra Cinematographer (₹18,000)</span>' : ''}
+                        return `<span class="addon-badge">${funcName} ${
+                          index === 0 ? "(Complimentary)" : "(₹1,800/hour)"
+                        }</span>`;
+                      })
+                      .join("")
+                  : ""
+              }
+              ${
+                bookingData.complimentaryCinematographer
+                  ? '<span class="addon-badge">Extra Cinematographer (₹18,000)</span>'
+                  : ""
+              }
             </div>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${Object.values(bookingData.addOns).some(Boolean) ? `
+          ${
+            Object.values(bookingData.addOns).some(Boolean)
+              ? `
           <div style="margin-top: 15px;">
             <label style="font-weight: bold; display: block; margin-bottom: 8px;">Video Add-Ons</label>
             <div class="addons-list">
-              ${bookingData.addOns.highlightShortMovie ? '<span class="addon-badge">Highlight Short Movie</span>' : ''}
-              ${bookingData.addOns.fullDocumentaryFilm ? '<span class="addon-badge">Full Documentary Film</span>' : ''}
-              ${bookingData.addOns.reel ? '<span class="addon-badge">Social Media Reel</span>' : ''}
+              ${
+                bookingData.addOns.highlightShortMovie
+                  ? '<span class="addon-badge">Highlight Short Movie</span>'
+                  : ""
+              }
+              ${
+                bookingData.addOns.fullDocumentaryFilm
+                  ? '<span class="addon-badge">Full Documentary Film</span>'
+                  : ""
+              }
+              ${
+                bookingData.addOns.reel
+                  ? '<span class="addon-badge">Social Media Reel</span>'
+                  : ""
+              }
             </div>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
         
         <div class="section price-section">
@@ -416,18 +519,26 @@ const funcName =
               <label>Package Description</label>
               <span>${packageInfo.description}</span>
             </div>
-            ${bookingData.couponCode ? `
+            ${
+              bookingData.couponCode
+                ? `
             <div class="field">
               <label>Coupon Applied</label>
               <span>${bookingData.couponCode} (${bookingData.couponDiscount}% discount)</span>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
           </div>
           
           <div class="price-highlight">
             <div class="amount">₹${bookingData.totalPrice.toLocaleString()}</div>
             <div class="label">Total Package Amount</div>
-            ${bookingData.couponCode ? `<div style="color: #16a34a; font-size: 14px; margin-top: 5px;">Coupon discount applied</div>` : ''}
+            ${
+              bookingData.couponCode
+                ? `<div style="color: #16a34a; font-size: 14px; margin-top: 5px;">Coupon discount applied</div>`
+                : ""
+            }
           </div>
         </div>
         
@@ -436,7 +547,7 @@ const funcName =
           <div class="grid">
             <div class="field">
               <label>Advance Payment</label>
-              <span>₹${bookingData.advance.toLocaleString() || '0'}</span>
+              <span>₹${bookingData.advance.toLocaleString() || "0"}</span>
             </div>
             <div class="field">
               <label>Balance Due Date</label>
@@ -444,7 +555,10 @@ const funcName =
             </div>
             <div class="field">
               <label>Remaining Balance</label>
-              <span>₹${Math.max(0, bookingData.totalPrice - (bookingData.advance || 0)).toLocaleString()}</span>
+              <span>₹${Math.max(
+                0,
+                bookingData.totalPrice - (bookingData.advance || 0)
+              ).toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -460,7 +574,7 @@ const funcName =
 
     printWindow.document.write(htmlContent);
     printWindow.document.close();
-    
+
     // Wait for content to load then print
     printWindow.onload = () => {
       printWindow.print();
@@ -478,7 +592,7 @@ const funcName =
           Generate a comprehensive PDF summary of this booking for your records
         </p>
       </div>
-      
+
       <div className="flex justify-center gap-4">
         <Button
           onClick={generatePDF}
@@ -487,12 +601,12 @@ const funcName =
           <Download className="w-4 h-4" />
           Download PDF
         </Button>
-        
+
         <Button
           variant="outline"
           onClick={() => {
             // Generate HTML preview in new tab
-            const printWindow = window.open('', '_blank');
+            const printWindow = window.open("", "_blank");
             if (printWindow) {
               printWindow.document.write(`
                 <!DOCTYPE html>
@@ -506,7 +620,7 @@ const funcName =
                   <h1>Booking Summary Preview</h1>
                   <p>Client: ${bookingData.clientName}</p>
                   <p>Total: ₹${bookingData.totalPrice.toLocaleString()}</p>
-                  <p>Package: ${bookingData.selectedPackage}</p>
+                  <p>Package: ${bookingData.selectedPackageName} Package</p>
                   <p><em>Use the "Download PDF" button to get the complete formatted summary.</em></p>
                 </body>
                 </html>
