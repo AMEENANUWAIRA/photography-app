@@ -241,7 +241,7 @@ export function ClientManagement() {
         </div>
         <Button
           onClick={() => setIsAddDialogOpen(true)}
-          className="bg-gradient-to-r from-black to-gray-800 hover:from-gray-700 hover:to-black"
+          className="bg-gradient-to-r from-black to-gray-800 hover:from-gray-700 hover:to-black text-white"
         >
           <Plus className="w-4 h-4 mr-2" /> Add Client
         </Button>
