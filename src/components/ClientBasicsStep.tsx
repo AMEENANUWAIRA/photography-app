@@ -15,11 +15,13 @@ import { BookingData } from "../App";
 interface ClientBasicsStepProps {
   bookingData: BookingData;
   updateBookingData: (updates: Partial<BookingData>) => void;
+  errors?: Record<string, string[]>;
 }
 
 export function ClientBasicsStep({
   bookingData,
   updateBookingData,
+  errors = {},
 }: ClientBasicsStepProps) {
   return (
     <div className="space-y-8">
@@ -34,9 +36,17 @@ export function ClientBasicsStep({
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="clientName" className="text-black-elegant">
-                Full Name *
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor="clientName"
+                  className="text-black-elegant"
+                >
+                  Full Name *
+                </Label>
+                {errors.name && (
+                  <span className="text-red-600 text-sm">{errors.name[0]}</span>
+                )}
+              </div>
               <Input
                 id="clientName"
                 value={bookingData.clientName}
@@ -49,9 +59,14 @@ export function ClientBasicsStep({
               />
             </div>
             <div className="space-y-2">
+              <div className="flex items-center justify-between">
               <Label htmlFor="phone" className="text-black-elegant">
                 Phone *
               </Label>
+              {errors.phone && (
+                <p className="text-red-600 text-sm -mt-1">{errors.phone[0]}</p>
+              )}
+              </div>
               <Input
                 id="phone"
                 value={bookingData.phone}
@@ -79,9 +94,14 @@ export function ClientBasicsStep({
               />
             </div>
             <div className="space-y-2">
+              <div className="flex items-center justify-between">
               <Label htmlFor="email" className="text-black-elegant">
                 Email *
               </Label>
+              {errors.email && (
+                <p className="text-red-600 text-sm -mt-1">{errors.email[0]}</p>
+              )}
+              </div>
               <Input
                 id="email"
                 type="email"
@@ -110,9 +130,16 @@ export function ClientBasicsStep({
               />
             </div>
             <div className="space-y-2">
+              <div className="flex items-center justify-between">
               <Label htmlFor="currentLocation" className="text-black-elegant">
                 Current Location
               </Label>
+              {errors.location && (
+                <p className="text-red-600 text-sm -mt-1">
+                  {errors.location[0]}
+                </p>
+              )}
+              </div>
               <Input
                 id="currentLocation"
                 value={bookingData.currentLocation}
